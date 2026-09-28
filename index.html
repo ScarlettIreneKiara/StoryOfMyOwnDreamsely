@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="nebula">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Little Bridge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--fs:1.2rem;--lh:1.9;--body:'EB Garamond',Georgia,serif;--disp:'Cormorant Garamond',Georgia,serif;
+--ink:#ece6f7;--dim:#b7a9d1;--acc:#c9a0f0;--acc2:#7b3fd4;--rule:rgba(201,160,240,.3);--panel:rgba(16,8,34,.86);--bg1:#1c0f3c;--bg2:#06030f;--ts:0 0 14px #06030f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme=midnight]{--ink:#e4ecf7;--dim:#93a7c4;--acc:#7fc4ff;--acc2:#2a6fd6;--rule:rgba(127,196,255,.3);--panel:rgba(6,12,26,.88);--bg1:#0a1630;--bg2:#02050c;--ts:0 0 14px #02050c}
+:root[data-theme=paper]{--ink:#2a2233;--dim:#6c6079;--acc:#6d3fb8;--acc2:#6d3fb8;--rule:rgba(109,63,184,.28);--panel:rgba(250,246,238,.95);--bg1:#f6f1e8;--bg2:#ece3d2;--ts:none}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;color:var(--ink);font-family:var(--body);overflow-x:hidden;min-height:100%;
+background:radial-gradient(ellipse 80% 50% at 15% 0%,color-mix(in srgb,var(--acc2) 38%,transparent),transparent),radial-gradient(ellipse 90% 50% at 60% 100%,color-mix(in srgb,var(--acc2) 30%,transparent),transparent),linear-gradient(var(--bg1),var(--bg2)) fixed}
+button{font-family:inherit;color:inherit;cursor:pointer}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+[data-theme=paper] #sky,[data-theme=paper] #bh{display:none}
+#bh{position:fixed;z-index:0;pointer-events:none;right:-130px;top:52%;width:320px;height:320px;opacity:.85}
+#bh i{position:absolute;border-radius:50%}
+#bh .d{inset:0;background:conic-gradient(#ffcd8cd9,#c748c7b3,#7b3fd4bf,#ffcd8cd9,#c748c7b3,#7b3fd4bf,#ffcd8cd9);filter:blur(16px);animation:sp 60s linear infinite}
+#bh .r{inset:21%;border:2px solid #ffdcb48c;box-shadow:0 0 26px 4px #ffbe8c66}
+#bh .c{inset:27%;background:#020103;box-shadow:0 0 60px 28px #040208e6}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(max-width:900px){#bh{width:200px;height:200px;right:-90px;opacity:.55}}
+.app{position:relative;z-index:1}
+.prog{position:fixed;top:0;left:0;right:0;height:3px;z-index:60}
+.fill{height:100%;width:0;background:linear-gradient(90deg,var(--acc2),var(--acc))}
+.bar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;gap:10px;padding:calc(12px + env(safe-area-inset-top,0px)) 14px 12px;background:linear-gradient(var(--panel),transparent);transition:transform .4s,opacity .4s}
+.bar .t{flex:1;text-align:center;font-family:var(--disp);font-size:1.05rem;letter-spacing:.04em;color:var(--acc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .t small{color:var(--dim);font-family:var(--body);font-size:.75rem;margin-left:8px}
+.ib{width:40px;height:40px;border-radius:50%;border:1px solid var(--rule);background:var(--panel);font-size:1rem;color:var(--acc)}
+.ib:hover{border-color:var(--acc)}
+body.focus .bar,body.focus .prog{transform:translateY(-120%);opacity:0}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;opacity:.5}
+.fab:hover,body.focus .fab{opacity:1}
+.scrim{position:fixed;inset:0;z-index:70;background:rgba(3,1,8,.6);opacity:0;pointer-events:none;transition:opacity .3s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;bottom:0;left:0;width:min(350px,86vw);z-index:80;background:var(--panel);backdrop-filter:blur(14px);border-right:1px solid var(--rule);padding:calc(22px + env(safe-area-inset-top,0px)) 18px 22px;transform:translateX(-105%);transition:transform .4s;overflow:auto}
+.drawer.on{transform:none}
+.drawer h3{font-family:var(--disp);font-weight:500;font-size:1.6rem;margin:0 0 4px;color:var(--ink)}
+.drawer p{margin:0 0 20px;color:var(--dim);font-size:.85rem;letter-spacing:.12em}
+.ti{display:grid;grid-template-columns:44px 1fr 18px;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;border-bottom:1px dotted var(--rule);padding:14px 4px;color:var(--dim)}
+.ti:hover,.ti.cur{color:var(--acc)}
+.ti .n{font-family:var(--disp);font-size:1.5rem;color:var(--acc)}
+.ti .mm{font-size:.78rem}
+.ti.done .ck::after{content:"✓";color:var(--acc)}
+.sheet{position:fixed;z-index:80;top:calc(62px + env(safe-area-inset-top,0px));right:12px;width:min(330px,94vw);background:var(--panel);backdrop-filter:blur(14px);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;opacity:0;transform:translateY(-8px);pointer-events:none;transition:.25s}
+.sheet.on{opacity:1;transform:none;pointer-events:auto}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0}
+.row>span{color:var(--dim);font-size:.9rem}
+.row div{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.row button{background:none;border:1px solid var(--rule);border-radius:8px;padding:6px 11px;font-size:.85rem}
+.row button.on{background:var(--acc);color:var(--bg2);border-color:var(--acc)}
+.cover{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:90px 24px 60px}
+.cover .eb{color:var(--dim);letter-spacing:.32em;font-size:.75rem}
+.cover h1{font-family:var(--disp);font-weight:500;font-size:clamp(3.4rem,13vw,8rem);line-height:.95;margin:22px 0 14px;text-shadow:var(--ts);background:linear-gradient(180deg,var(--ink),var(--acc));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cover .sub{font-style:italic;color:var(--dim);font-size:1.2rem;max-width:30rem}
+.cover .st{margin:26px 0 30px;color:var(--dim);font-size:.85rem;letter-spacing:.14em}
+.btn{background:transparent;border:1px solid var(--acc);color:var(--acc);border-radius:999px;padding:13px 32px;font-size:1rem;letter-spacing:.05em;margin:5px}
+.btn:hover{background:var(--acc);color:var(--bg2)}
+.btn.solid{background:var(--acc);color:var(--bg2)}
+.ctoc{width:100%;max-width:26rem;margin-top:44px;text-align:left}
+.ctoc .h{text-align:center;color:var(--dim);font-size:.75rem;letter-spacing:.24em;margin-bottom:10px}
+.ci{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:baseline;width:100%;background:none;border:0;border-bottom:1px dotted var(--rule);padding:13px 4px;color:var(--dim);text-align:left;font-size:1.05rem;transition:color .2s,padding-left .2s}
+.ci:hover{color:var(--acc);padding-left:10px}
+.ci .k{color:var(--acc);font-variant-numeric:tabular-nums;font-size:.85rem}
+.ci .m{font-size:.78rem}
+.chapter{max-width:44rem;margin:0 auto;padding:16vh 22px 6vh;scroll-margin-top:0}
+.opener{text-align:center;margin-bottom:54px;opacity:0;transform:translateY(20px);transition:opacity 1.2s,transform 1.2s}
+.opener.in{opacity:1;transform:none}
+.idx{font-family:var(--disp);font-size:clamp(6.5rem,26vw,12rem);line-height:.85;color:transparent;-webkit-text-stroke:1px var(--acc);opacity:.55}
+.opener h2{font-family:var(--disp);font-weight:500;font-size:clamp(1.9rem,5vw,2.6rem);margin:10px 0 8px;text-shadow:var(--ts)}
+.meta{color:var(--dim);font-size:.82rem;letter-spacing:.16em}
+.body p{font-size:var(--fs);line-height:var(--lh);margin:0 0 1.25em;text-shadow:var(--ts)}
+.body p:first-child::first-letter{font-family:var(--disp);float:left;font-size:3.7em;line-height:.8;padding:6px 10px 0 0;color:var(--acc)}
+.end{text-align:center;padding:14vh 24px 18vh;color:var(--dim)}
+.end .orn{font-size:1.4rem;color:var(--acc);letter-spacing:.5em}
+.end p{font-family:var(--disp);font-style:italic;font-size:1.5rem;margin:16px 0 24px}
+@media(prefers-reduced-motion:reduce){.opener{transition:none;opacity:1;transform:none}#bh .d{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+<div id="bh"><i class="d"></i><i class="r"></i><i class="c"></i></div>
+<div class="app">
+<div class="prog"><div class="fill" id="fill"></div></div>
+<header class="bar">
+  <button class="ib" id="menu" aria-label="Contents">&#9776;</button>
+  <div class="t" id="ttl">Little Bridge</div>
+  <button class="ib" id="aa" aria-label="Reading settings">Aa</button>
+</header>
+<button class="ib fab" id="fab" aria-label="Focus mode">&#9680;</button>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer"><h3>Little Bridge</h3><p>CONTENTS</p><div id="toc"></div></aside>
+<div class="sheet" id="sheet">
+  <div class="row"><span>Text size</span><div><button id="sm">A&minus;</button><button id="lg">A+</button></div></div>
+  <div class="row"><span>Spacing</span><div><button data-k="lh" data-v="1.7">Tight</button><button data-k="lh" data-v="1.9">Normal</button><button data-k="lh" data-v="2.2">Airy</button></div></div>
+  <div class="row"><span>Font</span><div><button data-k="font" data-v="serif">Serif</button><button data-k="font" data-v="sans">Sans</button></div></div>
+  <div class="row"><span>Theme</span><div><button data-k="theme" data-v="nebula">Nebula</button><button data-k="theme" data-v="midnight">Midnight</button><button data-k="theme" data-v="paper">Paper</button></div></div>
+</div>
+<section class="cover" id="cover">
+  <div class="eb">A NOVEL &middot; IN PROGRESS</div>
+  <h1>Little Bridge</h1>
+  <div class="sub">the story of Selene Celeste, and her daughter Iris</div>
+  <div class="st" id="stats"></div>
+  <div><button class="btn solid" id="begin">Begin reading</button><button class="btn" id="cont" hidden></button></div>
+  <nav class="ctoc" id="ctoc"><div class="h">CONTENTS</div></nav>
+</section>
+<main id="chapters"></main>
+<section class="end"><div class="orn">&#10022; &#10022; &#10022;</div><p>The story continues&hellip;</p><button class="btn" id="top">Back to the beginning</button></section>
+</div>
+<script>
+const chapters = [
+  {
+    label: "PROLOGUE",
+    title: "Prologue",
+    html: `
+      <p>My mom is Selene Celeste. The most powerful being that has ever existed — not that she'd ever put it that way herself. She hates when I say it like that, actually. She always says power isn't the point. I've never really understood what she means by that, not until much later. But I'm getting ahead of myself.</p>
+      <p>I'm her daughter. Her only one. Iris Celeste. She's told me, in every version of forever we've lived through, that I'm the love of her life. I believe her. I've never had a reason not to.</p>
+      <p>She made half the universe before she made me. Stars first, she told me once, then the spaces between them, then the rules that hold it all together — gravity, time, the way light bends around the edges of things. We live in a place with no walls and no clock on it. No sky, either, not really, just a kind of soft dark that goes on forever in every direction. We just call it home, or sometimes the Timeless place, when we're being fancy about it. She runs the whole show from there.</p>
+      <p>I used to sit next to her while she worked. Just floating there, chin on my knees, watching her hands move through light like it was water. That's where everything happens — where universes get born, where they get to live for a while, and where, eventually, they end. She did it the way some moms fold laundry. Like it was nothing. Like it was everything. Sometimes she'd hum while she worked, some tune I never learned the name of, and a whole galaxy would spiral out from between her fingers like smoke from a candle.</p>
+      <p>"Doesn't it ever wear you out?" I asked her once. I remember a star was dying between her fingers, going dim like a light bulb flickering before it gives out for good. I remember reaching out to touch the light, just to see what a dying star felt like.</p>
+      <p>She let me. Of course she let me — nothing in any universe has ever been able to so much as scratch either of us. I felt it fizzle against my palm, warm and strange, like static.</p>
+      <p>"Doesn't it?" I asked again.</p>
+      <p>She didn't even look up. "Wearing out means there's an end coming, little Iris. I don't have one." Then she touched my forehead, soft, the way she always did. "But I never get tired of you. So maybe that's my answer."</p>
+      <p>I remember laughing at that. She called me little Iris when she was being sweet, and just Ris when she was in a hurry, and my rainbow girl on the rare nights she felt like telling stories — something about how, in one of the old, small worlds below us, an iris used to mean a messenger, a bridge between one place and another. "That's you," she told me once. "You're my little bridge. Wherever I go, you go. Doesn't matter which world."</p>
+      <p>I remember thinking I'd have a thousand more nights like that one. I didn't know yet how wrong I'd turn out to be.</p>
+      <p>Past our home, one step down from it, she's also queen over two planets — twins, and the biggest ones out there by far. You could lose a hundred Earths inside either one and never notice the difference. Esseles and Exegol.</p>
+      <p>Esseles is the nice one. Warm. Golden fields that go on for miles, calm oceans the color of glass, mountains that catch the light funny at dusk and turn the whole sky pink and gold at once. The cities there are built up and around these massive towers — observatories, basically, except instead of looking at stars, the people inside them look at universes. Whole ones. Watching is the entire job. The only job, really. People spend their whole lives up in those towers, taking shifts, passing the work down to their kids, generation after generation, just — paying attention. Not to mess with anything. Not to fix it or steer it. Just to see it.</p>
+      <p>Because it turns out, if nobody's watching a universe, it starts to come apart. Slowly at first — a little dimmer, a little thinner, like a photograph left out in the sun too long. Then all at once, and then it's just gone, like it was never there to begin with. They've got a saying on Esseles, and my mom used to say it to me like a lullaby: watching keeps things alive. Being remembered is the same as existing.</p>
+      <p>I liked Esseles. I liked the way it smelled — I know that sounds strange for a whole planet to have a smell, but it did, something like rain on warm stone.</p>
+      <p>Exegol is the opposite in every way that matters. Dry, cracked ground stretching out flat and endless, storms that never really stop rolling across the horizon, lightning flashing behind the clouds like something enormous breathing under there. There used to be a whole fleet buried under the surface — hidden away in shipyards carved out of rock, waiting. While Esseles remembers things, Exegol gets ready. Gets ready for what, I never really asked. Not because I was scared to know — nothing there could touch us any more than the dying star could — just because it never seemed important yet.</p>
+      <p>I grew up knowing all of this the same way you know your own street, your own room, the creak in the third stair. It wasn't special. It was just life.</p>
+      <p>That night — if you can even call it night when there's no sun to set — we fell asleep in our room, my mom's arms wrapped around me like always, her chin resting on the top of my head. "Goodnight, little Iris," she said, the way she said it every night, like it was a promise instead of a habit. I remember the quiet. I remember nothing in all of existence being able to reach us there. Nothing ever had. Nothing ever could.</p>
+      <p>When she woke up, she was a baby.</p>
+      <p>Not where we live. Somewhere else completely — a tiny, spinning little dimension called Earth, more fragile than anything I'd ever seen her hold. Her whole huge, impossible self, folded down and squeezed into something small and soft, something with a heartbeat you could actually hear if you pressed your ear to it. And me? I was tucked inside her, curled up small too, waiting. Like she was pregnant with me, except I'd already existed for longer than that entire little world had.</p>
+      <p>Some part of her still knew, though. Still felt her real body, asleep back home, waiting for her to come back to it. A thread, thin as spider silk, stretched all the way across the space between who she really was and who she was about to become.</p>
+      <p>It happened because two people wished for it. Ethan and Elena Ashford — rich, the kind of rich that gets your name in newspapers, the kind of rich that buys buildings — out in Washington. They already had a son, James. Two years older, dark-haired, the kind of kid who'd grow up polite and a little too serious. My uncle, technically. Though he had no idea. Neither did she, not really, not anymore.</p>
+      <p>Because her memory — of me, of home, of everything she used to be — got buried. Almost all of it. Pushed down so deep and so hard it was like it had never happened at all, the way you shove a box in the back of a closet and eventually forget you own it.</p>
+      <p>Almost all of it.</p>
+      <p>Because even as a newborn, even wrapped up in some scratchy hospital blanket under fluorescent lights in a world way too small and way too loud for her, she felt it. That ache, small and constant, tucked somewhere under her ribs. Missing someone. Someone she couldn't put a name to, couldn't picture, couldn't even really remember losing.</p>
+      <p>She just didn't know yet. That someone was Iris.</p>
+      <p>And somewhere, back home, in a bed that was suddenly half-empty, I was already starting to miss her too.</p>
+    `
+  },
+  {
+    label: "CHAPTER NEGATIVE 3",
+    title: "Chapter Negative 3",
+    html: `
+      <p>Mom used to tell me this story all the time — about her life here, before me. About the family she had before she became my family. I think she liked telling it. I think some small part of her, even with her memory buried the way it was, needed to.</p>
+      <p>She was the baby of the family. The only daughter. Grandpa and Grandma doted on her like she was made of something rarer than gold — which, I guess, in a way, she was.</p>
+      <p>My grandpa — Ethan Ashford — is a business tycoon. He runs Ashford Defense, one of the biggest names in the industry. My grandma — Elena Ashford — is a well-known actress and singer, and on top of that, she has a PhD in medicine, which always struck me as a strange combination until I actually met her and realized of course she does everything.</p>
+      <p>They wanted a daughter for years. A little girl who'd grow up looking like the two of them mixed together. They had my uncle James first, when Grandma was twenty-three. Then three years of trying, hoping, waiting — until finally, at twenty-six, she got pregnant with my mom.</p>
+      <p>They were so happy they gave the entire company a bonus. Fifteen days of paid leave, company-wide, the same day they confirmed it at the eight-week checkup. Grandpa apparently walked out of that appointment and just started calling department heads.</p>
+      <p>James, who was three at the time, was deeply confused by the whole thing. He marched up to Grandma with his arms crossed and asked how exactly there was a baby in her stomach — and then, very seriously, accused her of having eaten one alive.</p>
+      <p>"That's not quite how it works, sweetheart," she told him, laughing so hard she had to sit down.</p>
+      <p>The first three months, Grandpa treated her like she was made of glass. He baby-proofed the entire house before she'd even hit her second trimester. She had morning sickness bad enough that some days she could barely get out of bed, and still she went to work, still he watched her like a hawk the whole time, one eye always on her, one eye always on the baby that wasn't even showing yet.</p>
+      <p>As the months went on, her belly grew right along with the due date creeping closer. She wrapped every film project she could as fast as possible, clearing her schedule, trading work for rest, because she knew — she always knew — that the last stretch would need all of her.</p>
+      <p>She went into labor early. Grandpa was in the middle of a board meeting when the call came. He didn't even finish the sentence he was on — just grabbed his coat, swung by James's kindergarten to pick him up, and drove straight to the ER, breaking probably every speed law Washington had.</p>
+      <p>Ten hours later, on August 28th, 2004, my mom was born.</p>
+      <p>The nurses took her off to be cleaned up and checked over in the observation room. Healthy. Perfectly healthy. And almost immediately, something strange happened to Grandma — her skin cleared up, color came back into her face, and for weeks afterward people kept telling her she looked younger, somehow, like carrying my mom had left something behind in her blood. Some kind of residue. None of them understood it then. None of them ever really would.</p>
+      <p>After the observation, they finally let Grandma hold her. She pressed a kiss to my mom's forehead and whispered, so soft it was almost just breath: "Welcome to the family, Selene. Selene Ashford."</p>
+      <p>Grandpa came in right after. He kissed both their foreheads and cried — really cried, the kind of crying big tough businessmen pretend they don't do — and James trailed in behind him, small hand wrapped around his dad's fingers, looking up at the bundle in Grandma's arms.</p>
+      <p>"Mom," he said, "is she my sister?" Grandma smiled at him. "She's your cute little sister. The one you always asked for."</p>
+      <p>He didn't say anything else. Just stared at her like she was the most interesting thing he'd ever seen, which, to a three-year-old, she probably was.</p>
+      <p>That first night, Grandma nursed the five-hour-old baby, fed her, rocked her until she finally settled into sleep against her chest. They stayed in the hospital for a few more days for observation. Grandpa split his time running back and forth between the office and the hospital room, and both sides of the family started showing up to meet the newest Ashford.</p>
+      <p>Grandma's side was the Everglades — Robert and Rose Everglade, who owned Everglade Corporation, a media and entertainment empire that seemed to touch every screen in the country. Grandma had an older brother too, Sebastian Everglade, the CEO, married to Lily, whose own family ran a regional media company. They had a five-year-old son, Oliver.</p>
+      <p>Grandpa's side was quieter but no less established. His parents, Henry and Elise Ashford, both retired by then, and his older sister Jasmine — the current COO of Ashford Industries — married to her college sweetheart, Harrington Cole. They had a four-year-old daughter, Charlotte.</p>
+      <p>When Grandma and Mom finally came home from the hospital, the family threw a welcome party in the backyard. Nothing extravagant — no press, no formalities, none of the usual weight that came with being who they were. Just family, glasses clinking, everyone allowed to just be people for one afternoon instead of names on a masthead.</p>
+      <p>The cousins swarmed Grandma almost immediately — Oliver first, then little Charlotte trailing behind him. "Auntie, show us the baby!" they kept saying, tugging at her sleeve, and she crouched down low enough for them to see.</p>
+      <p>They took turns holding her, so carefully, so stiff with the fear of dropping something so small — none of them had ever held a baby that tiny before, not among their own little cluster of almost-same-age kids. Somebody's grip would go too loose and an adult hand would swoop in immediately to steady things, and everyone would laugh, and the baby would sleep right through all of it, unbothered.</p>
+      <p>By the time the party wound down, Grandma carried her back inside and lay down beside her in bed, exhausted in the good way. She wrapped her hand loosely around my mom's tiny fingers and just watched her breathe for a while before finally letting her own eyes close.</p>
+      <p>None of them knew yet what she really was. Not one of them.</p>
+      <p>But she was theirs. And for a while — for a good long while — that was enough.</p>
+    `
+  },
+  {
+    label: "CHAPTER NEGATIVE 2",
+    title: "Chapter Negative 2",
+    html: `
+      <p>As the months rolled by, Mom hit her first birthday, and Grandma and Grandpa turned it into a full gala — the kind of thing that gets written up in a society column instead of just remembered by the people who were there. Relatives, board members, press, half of Seattle's business elite, all crammed into one backyard turned event space to meet the newest Ashford.</p>
+      <p>They sat her down in front of a small chocolate cake and let her smash her fists into it while everyone cheered and cameras flashed. Somewhere in the middle of Grandma's speech — baby balanced on her hip, microphone in the other hand — Mom said her first word.</p>
+      <p>"Mama."</p>
+      <p>Grandma stopped mid-sentence. The whole yard went quiet for a second, then erupted.</p>
+      <p>Then, not to be outdone apparently, Mom tried again. "Dada." And then, turning to look at her brother across the yard, "Ja" — her best attempt at James.</p>
+      <p>James, five years old and thoroughly unbothered by the enormity of the moment, just grinned and said, "She said my name first for real this time, right? Not just Mama and Dada?"</p>
+      <p>Nobody corrected him.</p>
+      <p>Her first real gift to Grandma wasn't wrapped in paper. It was just that — being called by name, being known already, this early. Grandma burst into tears right there with the microphone still in her hand, and Grandpa wasn't much better, wiping his eyes with the back of his sleeve like he thought nobody would notice.</p>
+      <p>Not long after, she took her first steps. Grandma started bringing her along to set after that, propping her up somewhere safe just off-camera, and Mom would sit there wide-eyed, watching every take, then spend the ride home trying to mimic Grandma's expressions in the rearview mirror. The whole crew adored her. Someone on set nicknamed her "the tiniest director" because she'd frown at the monitor like she was studying blocking.</p>
+      <p>By three, she started kindergarten. Both grandparents drove her the first day, and for the first week or two she clung to them so hard at drop-off that teachers had to gently peel her off Grandpa's leg. Eventually it became routine, the way it does for every kid — but even then, her teachers noticed something. She picked things up fast. Too fast. By the time her classmates were sounding out picture books, she'd moved on to chapter books two grade levels ahead, just because she wanted to know what happened next.</p>
+      <p>Through primary and secondary school, she made three friends who stuck — Arielia, Grayson, and Thomas. The kind of friends who end up feeling like family, who'd eventually become the aunts and uncles I never technically had blood ties to but loved anyway. The four of them went on every school trip together, pulled all-nighters on group projects, spent summers finding new ways to get into harmless trouble. By graduation, all four of them had SAT scores good enough to get into MIT, and somehow, impossibly, they all said yes and went together.</p>
+      <p>Grandma and Grandpa saw them off that day. Bags packed, car loaded, the whole driveway goodbye scene.</p>
+      <p>And that same day, something else happened. Something nobody else in that driveway could have known was coming.</p>
+      <p>Her sealed memory broke open.</p>
+      <p>It didn't happen gently. She told me later it felt like two entire lifetimes trying to occupy the same skull at once — eighteen years of a girl named Selene Ashford, and something infinitely older underneath it, waking up piece by piece. She sat with it. Let both memories settle instead of fighting each other. And somewhere in that quiet, she understood exactly what she was again.</p>
+      <p>Her first move, once her head cleared, wasn't dramatic. She just quietly stationed a Star Destroyer on the dark side of the moon. A precaution. Nobody on Earth ever knew it was there.</p>
+      <p>Then she went inside and told her family everything.</p>
+      <p>I think some part of her expected fear. Or disbelief. Or at least a long, stunned silence.</p>
+      <p>Instead, Grandpa pulled her in first, and then Grandma, and then James came in from the side and wrapped his arms around all three of them at once, and nobody let go for a long moment.</p>
+      <p>"Even if you're a celestial entity," Grandma said into her hair, "it doesn't change one single thing. You're still our daughter."</p>
+      <p>That was it. That was the whole conversation, really. No follow-up questions, no fear, no distance. Just that.</p>
+      <p>She started at MIT that fall — double focus in Space & Science and Medicine. First year, she went to every lecture, put her head down, and still made time to be ridiculous with her friends between problem sets. Holidays, she flew back to Seattle, back to the same house, back to being someone's daughter instead of someone's professor's favorite student.</p>
+      <p>By her third year, she'd written and published a paper on quantum entanglement theory that made people twice her age start emailing her research requests.</p>
+      <p>After graduating from MIT, she started her own research institute — Stellar Tech — and began her work across the marine and space defense sectors, along with next-generation communication systems. She funded the first year almost entirely out of her own savings — barely slept, from what I've heard, running the whole thing on stubbornness and the kind of certainty that only comes from actually remembering how physics is supposed to work.</p>
+      <p>That same year, James married Martha, his sweetheart from college. Big wedding, full church, the works. Mom stood up as her bridesmaid, and from what I've heard, she cried through the entire ceremony despite being — technically — several billion years old.</p>
+      <p>The company kept growing. Three years in, it crossed a hundred billion dollars in valuation, and by then people had mostly stopped being surprised by anything Selene Ashford did.</p>
+      <p>Around that same time, she stopped aging. Quietly, the way most things about her happened. And she conceived me — not the way it happens for anyone else, but close enough to it that it still felt, to her, like the most human thing she'd ever done. I began forming slowly inside her, wrapped in whatever she was made of. Grandma's own aging slowed down too, some residual echo of Mom's nature still lingering in her blood from years before — she still looked like she was in her thirties, long after she should have stopped.</p>
+      <p>People used to whisper about it. Actresses twice as famous as her getting quietly jealous, wondering what skincare routine she was using, what surgeon, what secret. None of them ever guessed the truth.</p>
+      <p>How could they? Nobody ever does, not until it's already too late to be anything but family.</p>
+    `
+  },
+  {
+    label: "CHAPTER NEGATIVE 1",
+    title: "Chapter Negative 1",
+    html: `
+      <p>When Mom found out she was pregnant, she said it plainly, every time she told the story: she was the happiest person on Earth. Not the happiest person in the universe, not the happiest entity across all dimensions — just, for that one moment, the happiest person on Earth. That was the part she wanted to be true.</p>
+      <p>She found out on an ordinary Tuesday. Nothing about the morning suggested it would end differently than any other — until it did. She told me she just knew, somehow, before the test even finished. A feeling settling into her like something coming home.</p>
+      <p>The doctors had a name for what happened. They called it a self-pregnancy — one of the rarest cases in recorded medicine, something they'd only ever seen a handful of times and never fully understood. They ran the same tests twice, convinced they'd made some kind of error.</p>
+      <p>"I'd like to run this a third time," the OB told her, frowning at the chart like it had personally offended her. "There's no father listed anywhere in your intake, and I need to make sure we're not—"</p>
+      <p>"You're not missing anything," Mom said, calm as anything. "There isn't one. Run it as many times as you need to. You'll get the same answer."</p>
+      <p>The doctor did run it again. Got the same answer. Never brought it up a second time after that, though Mom said she caught the woman staring at the results for a long moment, like she was trying to memorize something impossible before it slipped away.</p>
+      <p>She told me the first three months felt like stepping into a body she didn't quite recognize yet. New. Unfamiliar. Greasy food turned her stomach the second it hit her tongue, so she gave it up entirely and switched to small, plain meals instead. Grandma moved in close during those months — not literally, but close enough that she was there almost daily, walking Mom through the parts of pregnancy no medical degree fully prepares you for.</p>
+      <p>"Nobody warns you the smell of coffee will betray you," Grandma told her, setting a mug down three rooms away from where Mom sat, just to be safe. "One day it's your favorite thing in the world. The next, you can't be in the same building as it."</p>
+      <p>"I still can't believe coffee is the enemy now," Mom groaned, burying her face in a pillow. "I built a hundred-billion-dollar company on coffee."</p>
+      <p>"Well, the company will survive nine months without you drinking it."</p>
+      <p>For Mom, the craving that replaced it was sour. Anything sour. She went through the first trimester eating things that made everyone else in the house wince just watching her — pickles straight from the jar, lemons eaten like oranges, sour candy by the fistful.</p>
+      <p>"How is that not eating your face off from the inside?" James asked her once, watching her bite into something that looked like it had been marinated in vinegar and lemon at the same time.</p>
+      <p>"It's good," she told him, mouth still full. "You're just wrong."</p>
+      <p>"I'm telling Martha you've officially lost it."</p>
+      <p>"Tell her I said hi while you're at it."</p>
+      <p>She worked mostly from the family home during that stretch, only showing up at the office when she absolutely had to. Grandpa fussed over the arrangement more than she did.</p>
+      <p>"You don't have to prove anything to that board," he told her one evening, watching her review a stack of proposals at the kitchen table, one hand pressed to her stomach. "Let them wait."</p>
+      <p>"I'm not proving anything," she said without looking up. "I'm just not the kind of person who stops."</p>
+      <p>"You're your mother's daughter, that's for sure."</p>
+      <p>"I'm several things' daughter, apparently," she said, and he laughed so hard he had to sit down.</p>
+      <p>As the months went on, something else started happening — her maternal instincts weren't just emotional, they were powerful, in the literal sense. There were nights her control slipped, just slightly, just enough that the air around her would hum with something no one else in the house could safely be near. The first time it happened, Grandpa found her standing perfectly still in the hallway at 2 a.m., the light fixtures overhead buzzing faintly, her eyes distant.</p>
+      <p>"Selene?"</p>
+      <p>She blinked, and the buzzing stopped. "Sorry. Sorry, I didn't mean to—" She pressed both hands to her stomach like she was holding something in. "I need a minute. I'm okay. I just need a minute."</p>
+      <p>"Take whatever you need," he said, though she was already gone before he finished the sentence — teleported straight to the Star Destroyer stationed on the dark side of the moon, where she sat with it, alone, until she felt steady enough to come home.</p>
+      <p>She never told Grandma exactly what those trips were. Grandma never asked outright, though once, over tea, she said quietly, "You disappear sometimes. I notice. I just trust you'll tell me if it's something I need to know."</p>
+      <p>"It's not dangerous," Mom said. "I promise you that much. It's just — big. Bigger than this house can hold some nights. I go somewhere it can be big without hurting anything."</p>
+      <p>Grandma just nodded and refilled her cup, and that was the end of it.</p>
+      <p>By month six, her belly had rounded out fully, unmistakable now, and something in her settled along with it. Her powers steadied. She started going back into the office more, back to being Chairwoman and CEO of Stellar Tech, reviewing proposals and investment decks with one hand resting flat against her stomach the entire time, like she was keeping both conversations going at once — the boardroom, and me.</p>
+      <p>One of her board members made the mistake of suggesting, gently, that maybe she should step back until after the birth.</p>
+      <p>"I built this company from nothing," she told him, not unkindly, but with an edge underneath it that made the whole room go quiet. "Being pregnant doesn't make me less capable of running it. If anything, I'm paying closer attention now than I ever have."</p>
+      <p>Nobody brought it up again.</p>
+      <p>Every evening after work, she'd come home and spend an hour or two building things with her own hands — the crib, corner guards, soft padding along the edge of the bed frame. James stopped by more than once to "help," which mostly meant handing her tools and narrating unhelpfully.</p>
+      <p>"You're doing that wrong," he told her, watching her assemble the crib frame upside down on purpose just to see if he was paying attention.</p>
+      <p>"Oh yeah? You want to try?"</p>
+      <p>He held his hands up immediately. "Absolutely not. I trust the expert."</p>
+      <p>"That's what I thought."</p>
+      <p>And every night before she slept, she read to me. All kinds of books — things Grandma had read to her once, things she'd loved as a kid, sometimes just whatever was on the nightstand. I could hear all of it from inside her, muffled and warm, her voice the first sound I ever really knew. Some nights she'd pause halfway through a page and just talk to me instead, quiet, like she thought I could actually hear the difference.</p>
+      <p>"You're going to love it here," she told me once, hand resting where I was. "It's loud, and it's small, and none of it makes sense yet. But it's going to be good. I promise you that."</p>
+      <p>Grandma would come by most nights to check on her, sitting at the edge of the bed, trading stories back and forth — what it had been like carrying Mom, the parts that were hard, the parts nobody warns you about until you're already living them.</p>
+      <p>"You'll forget most of the pain," Grandma told her once. "Everyone says that like it's a comfort. It is, actually. Eventually you just remember wanting to meet her."</p>
+      <p>"Did you know? With me, I mean. Before I was born."</p>
+      <p>"I knew you'd be trouble," Grandma said, smiling. "I didn't know how much trouble. Turns out I still don't."</p>
+      <p>Mom laughed at that, the real kind, and Grandma reached over and smoothed the hair back from her face the way she must have done a thousand times before, back when Mom was the one being tucked in instead of doing the tucking in herself.</p>
+      <p>They went shopping together more than once — baby clothes, maternity wear, whatever caught their eye. Aunt Martha tagged along for one of the bigger trips, and the three of them ended up half-raiding the mall, buying toys nobody technically needed yet and designer pieces for themselves while they were at it.</p>
+      <p>"You do realize she's not going to fit into any of this for at least a year," Martha said, watching Mom add yet another tiny outfit to the cart.</p>
+      <p>"I don't care. Look at it. It's tiny. It has little stars on it."</p>
+      <p>"Everything in that cart has little stars on it."</p>
+      <p>"That's not a coincidence, Martha, that's a theme."</p>
+      <p>Mom got a little carried away picking out hoodies in sizes so small they looked like they were made for dolls, practically vibrating with excitement every time she added one to the pile. At one point Grandma had to physically take a fourth stroller out of her hands.</p>
+      <p>"You only need one of these."</p>
+      <p>"What if this one breaks?"</p>
+      <p>"Selene."</p>
+      <p>"Fine. Fine, put it back."</p>
+      <p>While the women shopped, the men handled the harder work back home — finishing the baby-proofing, framing out a new room adjoining Mom's, wiring it, painting it, getting it ready. Grandpa insisted on painting the ceiling himself, standing on a ladder for hours despite Grandma yelling up at him twice to be careful.</p>
+      <p>"I painted your nursery too, you know," he called down to Mom, who was sitting in the doorway with her feet up, supervising. "Nearly fell off this exact ladder doing it."</p>
+      <p>"Please don't fall off it doing mine."</p>
+      <p>"No promises."</p>
+      <p>There was a near-scare, too, in the eighth month — a Tuesday evening when Mom doubled over in the kitchen, breath catching, and for a few frantic minutes the whole house thought it was happening early. Grandpa had the car keys in hand before she even finished saying "I think it's fine, wait—"</p>
+      <p>It wasn't real labor. Just a hard kick and a cramp that faded within the hour. But the house didn't fully breathe out again until the doctor confirmed everything was fine over the phone.</p>
+      <p>"You scared ten years off my life," Grandpa told her afterward, sitting heavily at the kitchen table.</p>
+      <p>"I scared ten years off my own life," Mom said. "I thought she was coming a month early."</p>
+      <p>"She," Grandpa repeated, softer. "You keep saying she."</p>
+      <p>"I've known since the beginning, Dad. I don't need a scan to tell me."</p>
+      <p>He didn't argue. He never really did, not about things like that.</p>
+      <p>At dinner some nights, there was a strange mix of feelings hanging over the table. Happy, mostly. But a little sad too, in the quiet way — their little girl, the one they'd once held the exact same way, was about to become someone's mother herself, and somehow still looked barely older than the day she'd graduated.</p>
+      <p>"I keep looking at you and seeing both things at once," Grandma admitted one night, setting down her fork. "The baby I brought home, and the mother you're about to be. It's a strange thing, watching that happen in the same face."</p>
+      <p>"Is that a bad strange or a good strange?"</p>
+      <p>"Good," Grandma said, without hesitation. "Just strange."</p>
+      <p>In her ninth month, she went into labor for real this time — no confusion, no false alarm, just Grandpa grabbing the same set of keys and driving the same familiar route, faster than he probably should have.</p>
+      <p>Nine hours later, on August 28th, 2030 — the same date, the same hospital, almost the same room — she gave birth to me.</p>
+      <p>Before they took me off to the observation room to be checked, she told me, much later, that I'd wrapped my hand around her finger and held on so tight the nurse had to gently coax me loose.</p>
+      <p>"She's got a grip on her," the nurse laughed, trying to ease my fingers free.</p>
+      <p>"Let her hold on," Mom said, voice already thick with exhaustion and something else underneath it. "She can hold on as long as she wants."</p>
+      <p>She said her heart ached the entire time we were finally, briefly apart.</p>
+      <p>Not from pain.</p>
+      <p>From missing me already.</p>
+    `
+  },
+  {
+    label: "CHAPTER ZERO",
+    title: "Chapter Zero",
+    html: `
+      <p>The day I'm born, I sense a kind of safety settle around my mom before I sense anything else. Before they even finish cleaning me up, before I can see a single shape clearly, I feel it — steady, warm, unmistakably hers.</p>
+      <p>They take me to the observation room to check my health. Before the nurse carries me out, Mom presses a kiss to my forehead and then my cheeks, even exhausted as she is, even half-collapsed back into the hospital bed after nine hours of labor.</p>
+      <p>"Take good care of her," she murmurs to the nurse, voice thin with tiredness. "I'll be right here."</p>
+      <p>"She's not going anywhere far, Mrs. Ashford. Promise."</p>
+      <p>I can just barely make out Mom's face from across the room, and her voice reaches me even fainter than that — my senses are still knitting themselves together, still learning how to be senses at all. But something in my blood works faster than it should. Faster than any ordinary newborn's. Within minutes, sound sharpens. Shapes start to mean something.</p>
+      <p>They wash the blood off me first, gently, murmuring numbers to each other the whole time — heart rate, breathing, reflexes. Someone draws cord blood. Someone else bags the placenta, labels it, sets it aside like it matters, though nobody in that room has any idea just how much it actually does.</p>
+      <p>Then I'm laid down under a warm light, and that's it. That's the whole world for a while.</p>
+      <p>I stare at the ceiling. Five hours, easily. All I can manage is a slow kick of legs, a clumsy swipe of one arm, like my body hasn't fully agreed to follow instructions yet. It's strange, being this small. Being this new.</p>
+      <p>When the tests finally finish, they wrap me up and carry me down the hall to Mom's room.</p>
+      <p>She looks better already — color back in her face, hair pulled back, sitting up against a mountain of pillows like she's been waiting the entire five hours without blinking once. The nurse settles me into her arms, and she pulls me in immediately, like she's been aching for exactly this weight against her chest.</p>
+      <p>"Welcome home, Iris," she whispers. "My little girl. My Ris." Her thumb brushes my cheek, feather-light. "Mom's never going to leave you alone again. I'm sorry it took this long to finally have you here."</p>
+      <p>I don't understand a single word of it. Not yet. But something in her voice reaches whatever part of me already knows her, and I break into a small, gummy smile, and laugh — that startled newborn laugh that isn't really a laugh yet, just air and instinct.</p>
+      <p>She actually gasps. "Did you just— she smiled! Someone get a picture, she smiled at me—"</p>
+      <p>Nobody's fast enough. It's gone before anyone even reaches for a phone.</p>
+      <p>She rocks me slowly after that, humming low in her throat, until the humming turns into an actual lullaby — some tune I'll spend years trying to place and never quite manage to, half-familiar the way dreams are half-familiar. Then, softer, she slides into another song, her own slowed-down version of it, something with the word mine threaded all through it like she's rewriting it specifically for me as she goes.</p>
+      <p>I fall asleep against her chest before she finishes the second verse.</p>
+      <p>We sleep like that for six hours straight. I don't stir once.</p>
+      <p>When I wake — barely, just enough to register warmth and weight shifting nearby — Grandma is already in the room. She looks impossibly young standing there, young enough that a stranger might mistake her for Mom's sister rather than her mother, some quiet echo of Mom's nature still humming in her blood from years back.</p>
+      <p>She leans over the bed carefully, careful not to wake either of us, and presses the softest kiss to the top of my head.</p>
+      <p>"There she is," she whispers, to no one in particular. Then she climbs in on the other side of the bed, wraps an arm around Mom's shoulders, and closes her eyes too.</p>
+      <p>Grandpa comes in not long after. He doesn't say anything at all — just stands in the doorway for a second, taking in the three of us tangled together on that one hospital bed, and quietly lifts his phone and takes the picture Mom missed earlier. Three generations, all half-asleep, none of us posed, none of us aware yet that it's happening.</p>
+      <p>He looks at the photo for a long moment before pocketing his phone, like he already knows exactly what it's worth.</p>
+      <p>Uncle James and Aunt Martha show up an hour later, arms loaded down with gift bags and a stroller box someone clearly wrapped badly on purpose as a joke.</p>
+      <p>"Excuse me," Martha says, hands on her hips the second she sees the three of us still half-tangled together, "how do you take a three-generation photo of the ladies without me?"</p>
+      <p>"You were stuck in traffic," Grandpa says, not even looking up from unloading the gift bags.</p>
+      <p>"That is not an excuse. Get back in position, everyone. I need in this picture."</p>
+      <p>She wedges herself onto the edge of the bed, and Grandpa and James take turns snapping pictures on three different phones, everyone laughing quietly so as not to wake anybody who's actually still asleep — which, by that point, is just me.</p>
+      <p>For the next fifteen days, relatives filter through in a steady stream — aunts, uncles, cousins, family friends who'd known Mom since she was the one being passed around a hospital room. Everyone wants to see the newest addition, everyone brings something. Some bring practical things — clothes, blankets, absurdly overpriced baby monitors. Others bring things with weight to them instead — old jewelry, a pocket watch that's been in the family for three generations, advice delivered in the particular tone that only grandparents and great-aunts seem to have access to.</p>
+      <p>"Sleep when she sleeps," one great-aunt tells Mom, patting her hand solemnly, like she's imparting ancient wisdom instead of the most common advice in the history of parenting.</p>
+      <p>"I'll try," Mom says, smiling the polite smile she saves for advice she's already heard eleven times that week.</p>
+      <p>On the sixteenth day, we finally go home.</p>
+      <p>Grandpa pulls the new Rolls-Royce Spectre around — the one he gifted Mom back in her sixth month, since apparently a regular car was never really an option once I was involved. It's been retrofitted since then: reinforced paneling, state-of-the-art impact protection, a car seat that looks more like it belongs in a spacecraft than a sedan. It rolls into the parking area smooth and silent, dark and gleaming, like it's arriving somewhere important instead of just picking up a baby.</p>
+      <p>I catch sight of the other cars lined up ahead of us and behind us — more than I can easily count, engines idling, waiting for us to move.</p>
+      <p>"Is all of this really necessary?" Mom asks, only half-serious, watching Grandpa settle my car seat into place with the focus of a man defusing something.</p>
+      <p>"Every bit of it," he says, without looking up.</p>
+      <p>Once we're all in, the whole procession pulls out together and merges onto the freeway, a slow-moving line of black cars weaving past stretches of green on either side, trees blurring by warm and soft through the tinted windows. We pass along the inland coast of Seattle, water catching the light in flashes between the tree line, before finally turning off toward a gate that swings open onto grounds that seem to stretch on for acres in every direction.</p>
+      <p>It takes another half hour just to reach the main house from the gate.</p>
+      <p>I don't remember any of the scenery, not really — not in any way I could describe later. But I remember the feeling of it. Moving, slow and steady, wrapped up warm against my mother's chest, her heartbeat under my ear the whole way home.</p>
+      <p>Home, for the first time. The first of so many I wouldn't understand yet were about to come.</p>
+    `
+  }
+];
+
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const S=Object.assign({fs:1.2,lh:1.9,font:'serif',theme:'nebula'},store.get('lb-set',{}));
+const P=store.get('lb-pos',{i:0,r:0}),READ=new Set(store.get('lb-read',[]));
+const words=h=>h.replace(/<[^>]+>/g,' ').trim().split(/\s+/).length,mins=n=>Math.max(1,Math.round(n/230));
+const numeral=t=>{const m=t.match(/Negative (\d+)/);return m?'\u2212'+m[1]:/Zero/.test(t)?'0':'\u2726'};
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v)),topOf=e=>e.getBoundingClientRect().top+scrollY;
+
+chapters.forEach((c,i)=>{
+  c.w=words(c.html);
+  const s=document.createElement('section');s.className='chapter';s.id='ch-'+i;
+  s.innerHTML=`<header class="opener"><div class="idx" aria-hidden="true">${numeral(c.title)}</div><h2>${c.title}</h2></header><div class="body">${c.html}</div>`;
+  $('#chapters').appendChild(s);
+  const b=document.createElement('button');b.className='ti';b.dataset.i=i;
+  b.innerHTML=`<span class="n">${numeral(c.title)}</span><span>${c.title}</span><span class="ck"></span>`;
+  b.onclick=()=>{go(i);closeAll()};$('#toc').appendChild(b);
+  const ci=document.createElement('button');ci.className='ci';
+  ci.innerHTML=`<span class="k">${String(i+1).padStart(2,'0')}</span><span>${c.title}</span>`;
+  ci.onclick=()=>go(i);$('#ctoc').appendChild(ci);
+});
+const els=$$('.chapter'),total=chapters.reduce((a,c)=>a+c.w,0);
+$('#stats').textContent=`${chapters.length} CHAPTERS`;
+
+function go(i,r=0,smooth=true){const e=els[i];if(e)scrollTo({top:topOf(e)+e.offsetHeight*r,behavior:smooth?'smooth':'auto'})}
+function cur(){const y=scrollY+innerHeight*.35;let k=-1;els.forEach((e,i)=>{if(topOf(e)<=y)k=i});return k}
+function rat(k){const e=els[k];return clamp((scrollY+innerHeight*.35-topOf(e))/e.offsetHeight)}
+
+// settings
+function apply(){const r=document.documentElement;
+  r.style.setProperty('--fs',S.fs+'rem');r.style.setProperty('--lh',S.lh);
+  r.style.setProperty('--body',S.font==='sans'?"system-ui,-apple-system,'Segoe UI',Roboto,sans-serif":"'EB Garamond',Georgia,serif");
+  r.dataset.theme=S.theme;
+  $$('[data-k]').forEach(b=>b.classList.toggle('on',String(S[b.dataset.k])===b.dataset.v));
+  store.set('lb-set',S)}
+$('#sheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  const k=cur(),r=k<0?0:rat(k);
+  if(b.dataset.k)S[b.dataset.k]=isNaN(b.dataset.v)?b.dataset.v:+b.dataset.v;
+  else if(b.id==='sm')S.fs=Math.max(1,+(S.fs-.08).toFixed(2));
+  else if(b.id==='lg')S.fs=Math.min(1.7,+(S.fs+.08).toFixed(2));
+  apply();if(k>=0)go(k,r,false)});
+apply();
+
+// panels
+const drawer=$('#drawer'),scrim=$('#scrim'),sheet=$('#sheet');
+function closeAll(){drawer.classList.remove('on');sheet.classList.remove('on');scrim.classList.remove('on')}
+$('#menu').onclick=()=>{sheet.classList.remove('on');drawer.classList.add('on');scrim.classList.add('on')};
+$('#aa').onclick=()=>{drawer.classList.remove('on');scrim.classList.remove('on');sheet.classList.toggle('on')};
+scrim.onclick=closeAll;
+addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});
+$('#fab').onclick=()=>document.body.classList.toggle('focus');
+$('#begin').onclick=()=>go(0);
+$('#top').onclick=()=>scrollTo({top:0,behavior:'smooth'});
+if(P.i>0||P.r>.03){const c=$('#cont');c.hidden=false;
+  c.textContent=`Continue \u00b7 ${chapters[P.i].title} \u00b7 ${Math.round(P.r*100)}%`;
+  c.onclick=()=>go(P.i,P.r)}
+
+// chapter openers fade in
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:.2});
+$$('.opener').forEach(o=>io.observe(o));
+
+// progress, current chapter, saved position
+let tick=false,saveT;
+function onScroll(){
+  const max=document.documentElement.scrollHeight-innerHeight;
+  $('#fill').style.width=(max>0?scrollY/max*100:0)+'%';
+  const k=cur(),tt=$('#ttl');
+  if(k<0)tt.textContent='Little Bridge';
+  else{const r=rat(k);tt.innerHTML=`${chapters[k].title}<small>${Math.round(r*100)}%</small>`;
+    $$('.ti').forEach(b=>b.classList.toggle('cur',+b.dataset.i===k));
+    if(r>.95&&!READ.has(k)){READ.add(k);store.set('lb-read',[...READ]);$$('.ti')[k].classList.add('done')}
+    clearTimeout(saveT);saveT=setTimeout(()=>store.set('lb-pos',{i:k,r:+r.toFixed(3)}),400)}
+  tick=false}
+addEventListener('scroll',()=>{if(!tick){tick=true;requestAnimationFrame(onScroll)}},{passive:true});
+READ.forEach(k=>$$('.ti')[k]&&$$('.ti')[k].classList.add('done'));
+onScroll();
+
+// infinite universe: parallax stars + drifting galaxies + black hole
+const cv=$('#sky'),g=cv.getContext('2d'),bh=$('#bh'),rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W,H,stars=[],gals=[];
+function size(){const D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;g.setTransform(D,0,0,D,0,0);
+  stars=Array.from({length:Math.round(W*H/2400)},()=>({x:Math.random()*W,y:Math.random()*H,z:[.15,.4,.8][Math.random()*3|0],r:Math.random()*1.3+.4,p:Math.random()*6.28,h:[270,200,320,45][Math.random()*4|0]}));
+  gals=Array.from({length:10},()=>({x:Math.random()*W,y:Math.random()*H*1.6,z:.08+Math.random()*.2,s:22+Math.random()*55,a:Math.random()*3.14,h:[265,285,315,215][Math.random()*4|0]}))}
+function draw(t){
+  if(document.documentElement.dataset.theme==='paper')return;
+  g.clearRect(0,0,W,H);const sy=scrollY,R=H*1.6;
+  gals.forEach(o=>{const y=((o.y-sy*o.z)%R+R)%R-H*.3;g.save();g.translate(o.x,y);g.rotate(o.a);g.scale(1,.38);
+    const gr=g.createRadialGradient(0,0,0,0,0,o.s);gr.addColorStop(0,`hsla(${o.h},80%,78%,.6)`);gr.addColorStop(.35,`hsla(${o.h},70%,55%,.22)`);gr.addColorStop(1,'transparent');
+    g.fillStyle=gr;g.beginPath();g.arc(0,0,o.s,0,6.283);g.fill();g.restore()});
+  stars.forEach(s=>{const y=((s.y-sy*s.z*.5)%H+H)%H,a=.35+.65*Math.abs(Math.sin(t/1400*s.z+s.p));
+    g.fillStyle=`hsla(${s.h},70%,88%,${a*(.4+s.z*.6)})`;g.fillRect(s.x,y,s.r,s.r)});
+  bh.style.transform=`translateY(${Math.sin(sy/1200)*70}px)`}
+function loop(t){draw(t);if(!rm)requestAnimationFrame(loop)}
+size();addEventListener('resize',()=>{size();draw(0)});
+if(rm)addEventListener('scroll',()=>draw(0),{passive:true});
+loop(0);
+</script>
+</body>
+</html>
